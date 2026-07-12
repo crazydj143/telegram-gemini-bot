@@ -32,7 +32,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        content=msg
+        contents=msg
     )
 
     await update.message.reply_text(response.text)
