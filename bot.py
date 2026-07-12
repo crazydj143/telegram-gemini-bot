@@ -3,12 +3,12 @@ import threading
 from flask import Flask
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
-from google import genai
+from groq import Groq
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = Groq(api_key=GROQ_API_KEY)
 
 # Render Web Server
 app = Flask(__name__)
@@ -18,24 +18,39 @@ def home():
     return "Telegram Bot Running"
 
 def run_web():
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
 
-threading.Thread(target=run_web).start()
+threading.Thread(target=run_web, daemon=True).start()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hello! Gemini Bot Ready")
+    await update.message.reply_text("🤖 Groq AI Bot Ready!")
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.text
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=msg
-    )
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant."
+                },
+                {
+                    "role": "user",
+                    "content": msg
+                }
+            ]
+        )
 
-    await update.message.reply_text(response.text)
+        reply = response.choices[0].message.content
+        await update.message.reply_text(reply)
+
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error:\n{e}")
 
 
 def main():
@@ -46,6 +61,7 @@ def main():
         MessageHandler(filters.TEXT & ~filters.COMMAND, chat)
     )
 
+    print("🤖 Bot Started...")
     application.run_polling()
 
 
