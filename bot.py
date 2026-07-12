@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "✨ Ask anything, anytime.\n"
         "🚀 *Let's begin our journey together!*\n\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
-        "💙 Powered by *Groq AI*\n"
+        "💙 Powered by *Dhaval goswami*\n"
         "⚡ Fast • Smart • Reliable"
     )
 
