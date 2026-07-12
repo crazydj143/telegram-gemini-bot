@@ -1,56 +1,80 @@
 import os
-import asyncio
-
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters
+)
 from google import genai
+
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN missing")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY missing")
+
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🤖 Welcome!\n\nMain Gemini AI Telegram Bot hoon.\nMujhe koi bhi message bhejo."
+        "🤖 Gemini Telegram Bot Started!\n\nSend me any message."
     )
 
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Commands:\n/start\n/help"
-    )
+async def ask_gemini(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user_text = update.message.text
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=user_text
+        )
+
+        answer = response.text
+
+        await update.message.reply_text(answer)
+
+    except Exception as e:
+        await update.message.reply_text(
+            f"Error: {str(e)}"
+        )
 
 
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    prompt = update.message.text
-
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-
-    await update.message.reply_text(response.text)
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    print(f"Error: {context.error}")
 
 
 def main():
+
     app = Application.builder().token(BOT_TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
     app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, chat)
+        CommandHandler("start", start)
     )
 
-    print("Bot Started...")
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            ask_gemini
+        )
+    )
+
+    app.add_error_handler(error_handler)
+
+    print("Bot Running...")
+
     app.run_polling()
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.get_event_loop()
-    except RuntimeError:
-        asyncio.set_event_loop(asyncio.new_event_loop())
-
     main()
