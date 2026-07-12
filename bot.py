@@ -8,6 +8,9 @@ from groq import Groq
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+# 👉 Apna Telegram User ID yaha daalo
+ADMIN_ID = 130647384
+
 client = Groq(api_key=GROQ_API_KEY)
 
 # Render Web Server
@@ -39,7 +42,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "✨ Ask anything, anytime.\n"
         "🚀 *Let's begin our journey together!*\n\n"
         "━━━━━━━━━━━━━━━━━━━━\n"
-        "💙 Powered by *Dhaval goswami*\n"
+        "💙 Powered by *Dhaval Goswami*\n"
         "⚡ Fast • Smart • Reliable"
     )
 
@@ -51,6 +54,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.text
+
+    # User ka message admin ko forward kare
+    try:
+        await context.bot.forward_message(
+            chat_id=ADMIN_ID,
+            from_chat_id=update.effective_chat.id,
+            message_id=update.message.message_id
+        )
+    except Exception as e:
+        print(f"Forward Error: {e}")
 
     try:
         response = client.chat.completions.create(
