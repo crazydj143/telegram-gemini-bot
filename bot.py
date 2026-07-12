@@ -25,7 +25,28 @@ threading.Thread(target=run_web, daemon=True).start()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🤖 Groq AI Bot Ready!")
+    welcome_message = (
+        "👋 *Welcome to Dhavalgiri Bot!* 🤖\n\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+        "🇬🇧 *Hello!*\n"
+        "I'm *Dhavalgiri Bot*, your smart AI assistant.\n"
+        "I'm here to help you with coding, studies, writing, ideas, problem-solving, technology, and much more.\n\n"
+        "🇮🇳 *नमस्ते!*\n"
+        "मैं *Dhavalgiri Bot* हूँ।\n"
+        "कोडिंग, पढ़ाई, लेखन, नए आइडियाज़, टेक्नोलॉजी, सामान्य जानकारी या किसी भी सवाल में आपकी मदद करने के लिए हमेशा तैयार हूँ।\n\n"
+        "💬 *Just send your message*\n"
+        "📩 *बस अपना संदेश भेजिए*\n\n"
+        "✨ Ask anything, anytime.\n"
+        "🚀 *Let's begin our journey together!*\n\n"
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        "💙 Powered by *Groq AI*\n"
+        "⚡ Fast • Smart • Reliable"
+    )
+
+    await update.message.reply_text(
+        welcome_message,
+        parse_mode="Markdown"
+    )
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
